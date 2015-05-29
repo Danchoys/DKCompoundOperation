@@ -42,14 +42,27 @@
 /// of the compound operation.
 @property (nonatomic, readonly) NSProgress *progress;
 
-/// Use this method to add operations. You are supposed to return a freshly
+/// Use this method to add operations
 /// @param operationCreationBlock You are supposed to return a freshly created
 /// instance of DKOperation from this block.
 /// @param progressFraction This parameter defines what part of the whole compound
 /// operation the operation being added plays. The whole operation is supposed to
 /// have the value of 100. Therefore if you want this suboperation to maintain only
 /// 30% of progress, you need to pass 30 as progressFraction.
-- (void)addOperationWithBlock:(DKOperation * (^)(void))operationCreationBlock progressFraction:(NSInteger)progressFraction;
+- (void)addOperationCreatedUsingBlock:(DKOperation * (^)(void))operationCreationBlock progressFraction:(NSInteger)progressFraction;
+
+/// Use this method to add operation using block-style
+/// @param operationBlock This block is supposed to perform the operation.
+/// You get an operation object passed a parameter to this block. You basically
+/// need to perform the following steps inside your block:
+/// 1. Configure operation's progress object;
+/// 2. Perform operations, updating progress object;
+/// 3. Call operation's completeOperation block.
+/// @param progressFraction This parameter defines what part of the whole compound
+/// operation the operation being added plays. The whole operation is supposed to
+/// have the value of 100. Therefore if you want this suboperation to maintain only
+/// 30% of progress, you need to pass 30 as progressFraction.
+- (void)addOperationWithOperationBlock:(void (^)(DKOperation *operation))operationBlock progressFraction:(NSInteger)progressFraction;
 
 @end
 
@@ -76,6 +89,20 @@
 /// block. For asynchronous operations this is a proper place to update the
 /// finished and executing flags. Base implementation does nothing.
 - (void)finalizeOperation;
+
+@end
+
+/// Class, allowing for the easy block-styled operation creation
+@interface DKBlockOperation : DKOperation
+
+/// Creates a new operation with block. You get an operation object passed
+/// a parameter to this block. You basically need to perform the following
+/// steps inside your block:
+/// 1. Configure operation's progress object;
+/// 2. Perform operations, updating progress object;
+/// 3. Call operation's completeOperation block.
++ (instancetype)operationWithBlock:(void (^)(DKOperation *operation))block;
+- (instancetype)initWithBlock:(void (^)(DKOperation *operation))block NS_DESIGNATED_INITIALIZER;
 
 @end
 
