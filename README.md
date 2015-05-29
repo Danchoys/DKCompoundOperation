@@ -15,7 +15,8 @@ The following code shows how to make a two-step operation of exporting video fro
 import <DKCompoundOperation/DKCompoundOperation.h>
 
 static NSInteger const kExportOperationProgressFraction = 30;
-static NSInteger const kUploadOperationProgressFraction = 70;
+static NSInteger const kUploadOperationProgressFraction = 65;
+static NSInteger const kCleanupOperationProgressFraction = 5;
 
 <...>
 
@@ -31,12 +32,18 @@ DKCompoundOperation *operation = [[DKCompoundOperation alloc] init];
 [operation addOperationWithBlock:^DKOperation *{
     return [UploadVideoOperation operation];
 } progressFraction:kUploadOperationProgressFraction];
+[operation addOperationWithOperationBlock:^(DKOperation *operation) {
+    operation.progress.totalUnitCount = 150;
+    // Perform some cleanup operations 
+    // updating operation.progress
+    operation.completeOperation(YES, nil);
+} progressFraction:kCleanupOperationProgressFraction];
 operation.completionBlock = ^(BOOL success, NSError *error) {
     if (error) {
         NSLog(@"Error occured: %@", error);
         return;
     }
-    self.progress = nil;
+    self.completedLabel.hidden = NO;
 };
 self.progress = operation.progress;
 [self.queue addCompoundOperation:operation];

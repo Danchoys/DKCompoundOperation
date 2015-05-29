@@ -76,6 +76,34 @@ static NSInteger const kMaxFractionSum = 100;
 
 @end
 
+@interface DKBlockOperation ()
+
+@property (nonatomic, strong) void (^block)(DKOperation *operation);
+
+@end
+
+@implementation DKBlockOperation
+
++ (instancetype)operationWithBlock:(void (^)(DKOperation *))block {
+    return [[DKBlockOperation alloc] initWithBlock:block];
+}
+
+- (instancetype)initWithBlock:(void (^)(DKOperation *))block {
+    self = [super initWithProgress:[NSProgress progressWithTotalUnitCount:0]];
+    if (!self)
+        return nil;
+    if (!block)
+        return nil;
+    _block = block;
+    return self;
+}
+
+- (void)performOperation {
+    self.block(self);
+}
+
+@end
+
 @interface DKCompoundOperation ()
 
 @property (nonatomic) NSInteger fractionSum;
@@ -108,12 +136,19 @@ static NSInteger const kMaxFractionSum = 100;
     self.completionBlockQueue = [NSOperationQueue currentQueue];
 }
 
-- (void)addOperationWithBlock:(DKOperation * (^)(void))operationCreationBlock progressFraction:(NSInteger)progressFraction {
+- (void)addOperationCreatedUsingBlock:(DKOperation *(^)(void))operationCreationBlock progressFraction:(NSInteger)progressFraction {
     self.fractionSum += progressFraction;
     NSAssert(self.fractionSum <= kMaxFractionSum, @"Internal inconsistency: sum of progress fractions can not exceed %ld", kMaxFractionSum);
     [self.progress becomeCurrentWithPendingUnitCount:progressFraction];
     [self addOperation:operationCreationBlock()];
     [self.progress resignCurrent];
+}
+
+- (void)addOperationWithOperationBlock:(void (^)(DKOperation *))operationBlock progressFraction:(NSInteger)progressFraction {
+    NSAssert(operationBlock != nil, @"Internal inconsistency: block can not be nil");
+    [self addOperationCreatedUsingBlock:^DKOperation *{
+        return [DKBlockOperation operationWithBlock:operationBlock];
+    } progressFraction:progressFraction];
 }
 
 - (void)addOperation:(DKOperation *)operation {
