@@ -1,15 +1,50 @@
 # DKCompoundOperation
 
-[![CI Status](http://img.shields.io/travis/Daniil Konoplev/DKCompoundOperation.svg?style=flat)](https://travis-ci.org/Daniil Konoplev/DKCompoundOperation)
 [![Version](https://img.shields.io/cocoapods/v/DKCompoundOperation.svg?style=flat)](http://cocoapods.org/pods/DKCompoundOperation)
 [![License](https://img.shields.io/cocoapods/l/DKCompoundOperation.svg?style=flat)](http://cocoapods.org/pods/DKCompoundOperation)
 [![Platform](https://img.shields.io/cocoapods/p/DKCompoundOperation.svg?style=flat)](http://cocoapods.org/pods/DKCompoundOperation)
 
+This easy-to-use and lightweight component allows to organize operations in sequences, providing a single interface for progress and completion tracking. It also makes possible the cancellation of the whole compound operation through the NSProgress instance.
+
 ## Usage
 
+The following code shows how to make a two-step operation of exporting video from ALAssetsLibrary and uploading the result to the remote server. It assumes that there are two classed: `ExportVidoOperation` and `UploadVideoOperation`, inheriting from `DKOperation`.
 
+```Objective-C
 
-## Requirements
+import <DKCompoundOperation/DKCompoundOperation.h>
+
+static NSInteger const kExportOperationProgressFraction = 30;
+static NSInteger const kUploadOperationProgressFraction = 70;
+
+<...>
+
+@property (nonatomic, strong) NSOperationQueue *queue;
+@property (nonatomic, weak) NSProgress *progress;
+
+<...>
+
+DKCompoundOperation *operation = [[DKCompoundOperation alloc] init];
+[operation addOperationWithBlock:^DKOperation *{
+    return [ExportVideoOperation operationWithVideoAssetURL:assetURL];
+} progressFraction:kExportOperationProgressFraction];
+[operation addOperationWithBlock:^DKOperation *{
+    return [UploadVideoOperation operation];
+} progressFraction:kUploadOperationProgressFraction];
+self.progress = operation.progress;
+operation.completionBlock = ^(BOOL success, NSError *error) {
+    if (error) {
+        DDLogError(@"VideoController. Upload video error %@", error);
+        [self showErrorAlertForVideoInfo:videoInfo];
+    } else
+        video.uploaded = YES;
+    video.progress = nil;
+};
+[self.queue addCompoundOperation:operation];
+
+```
+
+You may track changes to the progress object using KVO. For more information, visit the [NSProgress Class Reference](https://developer.apple.com/library/prerelease/ios/documentation/Foundation/Reference/NSProgress_Class/index.html) and [Key-Value Observing Guide](https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/KeyValueObserving/KeyValueObserving.html).
 
 ## Installation
 
