@@ -31,15 +31,14 @@ DKCompoundOperation *operation = [[DKCompoundOperation alloc] init];
 [operation addOperationWithBlock:^DKOperation *{
     return [UploadVideoOperation operation];
 } progressFraction:kUploadOperationProgressFraction];
-self.progress = operation.progress;
 operation.completionBlock = ^(BOOL success, NSError *error) {
     if (error) {
-        DDLogError(@"VideoController. Upload video error %@", error);
-        [self showErrorAlertForVideoInfo:videoInfo];
-    } else
-        video.uploaded = YES;
-    video.progress = nil;
+        NSLog(@"Error occured: %@", error);
+        return;
+    }
+    self.progress = nil;
 };
+self.progress = operation.progress;
 [self.queue addCompoundOperation:operation];
 
 ```
