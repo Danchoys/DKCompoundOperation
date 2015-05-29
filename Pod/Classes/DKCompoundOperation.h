@@ -102,7 +102,7 @@
 /// 2. Perform operations, updating progress object;
 /// 3. Call operation's completeOperation block.
 + (instancetype)operationWithBlock:(void (^)(DKOperation *operation))block;
-- (instancetype)initWithBlock:(void (^)(DKOperation *operation))block NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithBlock:(void (^)(DKOperation *operation))block;
 
 @end
 
