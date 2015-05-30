@@ -8,7 +8,7 @@ This easy-to-use and lightweight component allows to organize operations in sequ
 
 ## Usage
 
-The following code shows how to make a two-step operation of exporting video from ALAssetsLibrary and uploading the result to the remote server. It assumes that there are two classed: `ExportVidoOperation` and `UploadVideoOperation`, inheriting from `DKOperation`.
+The following code shows how to make a three-step operation of exporting video from ALAssetsLibrary, uploading the result to the remote server and performing some necessary cleanup. It assumes that there are two classed: `ExportVidoOperation` and `UploadVideoOperation`, inheriting from `DKOperation`.
 
 ```Objective-C
 
@@ -26,10 +26,10 @@ static NSInteger const kCleanupOperationProgressFraction = 5;
 <...>
 
 DKCompoundOperation *operation = [[DKCompoundOperation alloc] init];
-[operation addOperationWithBlock:^DKOperation *{
+[operation addOperationCreatedUsingBlock:^DKOperation *{
     return [ExportVideoOperation operationWithVideoAssetURL:assetURL];
 } progressFraction:kExportOperationProgressFraction];
-[operation addOperationWithBlock:^DKOperation *{
+[operation addOperationCreatedUsingBlock:^DKOperation *{
     return [UploadVideoOperation operation];
 } progressFraction:kUploadOperationProgressFraction];
 [operation addOperationWithOperationBlock:^(DKOperation *operation) {

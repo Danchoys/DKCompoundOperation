@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "DKCompoundOperation"
-  s.version          = "0.1.5"
+  s.version          = "0.1.6"
   s.summary          = "Compound operation for use with NSOperationQueue"
   s.homepage         = "https://github.com/danchoys/DKCompoundOperation"
   s.license          = 'MIT'
